@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>
+            <span class="typing-animation">SCalculator</span>
+        </h1>
+        <div class="hero-buttons">
+            {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="hero-button">Войти</a>
+                <a href="{% url 'registration' %}" class="hero-button">Зарегистрироваться</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="about">
+    <div class="container">
+        <h2>О НАС</h2>
+        <div class="about-content">
+            <div class="about-text">
+                <p>Scalculator - это онлайн калькуляторы строительных и отделочных материалов.</p>
+                <p>Здесь вы найдете расчеты товаров для отделки фасада и ремонта в квартире: сайдинг, водосточные системы, утеплитель, панели и многое другое.</p>
+                <a href="{% url 'about' %}" class="about-button">ПОДРОБНОСТИ</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-calculator">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Рассчитайте материалы для вашего ремонта</h2>
+            <p>Наш калькулятор поможет точно определить необходимое количество материалов и их стоимость</p>
+            <div class="cta-features">
+                <div class="feature">
+                    <span class="material-icons">architecture</span>
+                    <span>Учет размеров помещения</span>
+                </div>
+                <div class="feature">
+                    <span class="material-icons">calculate</span>
+                    <span>Точные расчеты</span>
+                </div>
+                <div class="feature">
+                    <span class="material-icons">description</span>
+                    <span>Экспорт результатов</span>
+                </div>
+            </div>
+            <a href="{% url 'calculator' %}" class="cta-link">
+                Рассчитать материалы
+                <span class="material-icons">arrow_forward</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}

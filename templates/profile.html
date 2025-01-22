@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-tabs">
+        <button class="tab-button active" data-tab="profile">
+            <div class="tab-folder">
+                <span class="tab-text">Профиль</span>
+            </div>
+        </button>
+        <button class="tab-button" data-tab="templates">
+            <div class="tab-folder">
+                <span class="tab-text">Шаблоны</span>
+            </div>
+        </button>
+    </div>
+
+    <!-- Контент профиля -->
+    <div class="tab-content active" id="profile-content">
+        <div class="profile-info">
+            <h2>Настройки профиля</h2>
+            
+            <!-- Основная информация -->
+            <div class="profile-section">
+                <h3>Основная информация</h3>
+                <form id="profileForm" class="profile-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="username">Логин</label>
+                        <div class="input-group">
+                            <input type="text" id="username" name="username" value="{{ user.username }}" class="form-input" readonly>
+                            <button type="button" class="edit-button" onclick="toggleEdit('username')">
+                                <span class="material-icons">edit</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <div class="input-group">
+                            <input type="email" id="email" name="email" value="{{ user.email }}" class="form-input" readonly>
+                            <button type="button" class="edit-button" onclick="toggleEdit('email')">
+                                <span class="material-icons">edit</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="save-button" id="saveProfile">Сохранить изменения</button>
+                </form>
+            </div>
+
+            <!-- Смена пароля -->
+            <div class="profile-section">
+                <h3>Смена пароля</h3>
+                <form id="passwordForm" class="profile-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="currentPassword">Текущий пароль</label>
+                        <div class="input-group">
+                            <input type="password" id="currentPassword" name="current_password" class="form-input">
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('currentPassword')">
+                                <span class="material-icons">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPassword">Новый пароль</label>
+                        <div class="input-group">
+                            <input type="password" id="newPassword" name="new_password" class="form-input">
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('newPassword')">
+                                <span class="material-icons">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Подтверждение пароля</label>
+                        <div class="input-group">
+                            <input type="password" id="confirmPassword" name="confirm_password" class="form-input">
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirmPassword')">
+                                <span class="material-icons">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="save-button">Сменить пароль</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контент шаблонов -->
+    <div class="tab-content" id="templates-content">
+        <div class="templates-grid">
+            {% if templates %}
+                {% for template in templates %}
+                <div class="template-card" data-template-id="{{ template.id }}">
+                    <div class="template-header">
+                        <h3>{{ template.name }}</h3>
+                        <div class="template-actions">
+                            <button class="btn-use" onclick="useTemplate({{ template.id }})">
+                                <span class="icon">↗</span>
+                                Использовать
+                            </button>
+                            <button class="btn-delete" onclick="deleteTemplate({{ template.id }})">
+                                <span class="icon">×</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="template-details">
+                        <p>Размеры: {{ template.length }}×{{ template.width }}×{{ template.height }} м</p>
+                        <p>Площадь: {{ template.total_area }} м²</p>
+                        <p>Материалов: {{ template.materials_count }}</p>
+                        <p>Проемов: {{ template.openings_count }}</p>
+                        <p class="template-date">Создан: {{ template.created_at }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-templates">
+                    <p>У вас пока нет сохраненных шаблонов</p>
+                    <a href="{% url 'calculator' %}" class="create-template-link">
+                        <span class="material-icons">add</span>
+                        Создать первый шаблон
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}

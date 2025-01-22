@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}О нас{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <section class="about-header">
+        <div class="container">
+            <h1>О нас</h1>
+            <p class="lead">Мы помогаем сделать ремонт проще и эффективнее</p>
+        </div>
+    </section>
+
+    <section class="about-content">
+        <div class="container">
+            <div class="grid-container">
+                <div class="about-card">
+                    <div class="card-icon">
+                        <span class="material-icons">calculate</span>
+                    </div>
+                    <h2>Точные расчеты</h2>
+                    <p>Наши калькуляторы учитывают все нюансы и особенности материалов, обеспечивая максимально точный расчет необходимого количества.</p>
+                </div>
+
+                <div class="about-card">
+                    <div class="card-icon">
+                        <span class="material-icons">savings</span>
+                    </div>
+                    <h2>Экономия</h2>
+                    <p>Правильный расчет материалов помогает избежать лишних затрат и минимизировать количество отходов.</p>
+                </div>
+
+                <div class="about-card">
+                    <div class="card-icon">
+                        <span class="material-icons">speed</span>
+                    </div>
+                    <h2>Быстрота</h2>
+                    <p>Мгновенные расчеты экономят ваше время на планирование ремонта.</p>
+                </div>
+            </div>
+
+            <div class="about-features">
+                <h2>Почему выбирают нас</h2>
+                <div class="features-list">
+                    <div class="feature">
+                        <span class="material-icons">check_circle</span>
+                        <p>Учет всех параметров помещения</p>
+                    </div>
+                    <div class="feature">
+                        <span class="material-icons">check_circle</span>
+                        <p>Расчет с запасом материала</p>
+                    </div>
+                    <div class="feature">
+                        <span class="material-icons">check_circle</span>
+                        <p>Поддержка различных типов материалов</p>
+                    </div>
+                    <div class="feature">
+                        <span class="material-icons">check_circle</span>
+                        <p>Экспорт результатов в PDF и Excel</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <h2>Готовы начать?</h2>
+                <p>Попробуйте наш калькулятор прямо сейчас</p>
+                <a href="{% url 'calculator' %}" class="cta-button">Перейти к расчетам</a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

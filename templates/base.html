@@ -1,0 +1,150 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>{% block title %}My Site{% endblock %}</title>
+
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    {% block extra_styles %}{% endblock %}
+
+    <script type="text/javascript" id="MathJax-script" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']],
+                processEscapes: true
+            }
+        });
+    </script>
+
+</head>
+<body>
+    <header class="header">
+    {% block header %}
+
+        <div class="header-container">
+            <a href="{% url 'home' %}" class="logo">
+                <img src="{% static 'logo.jpg' %}" alt="Logo">
+                <span class="logo-text">SCalculator</span>
+            </a>
+            <!-- В header-container после логотипа, перед nav -->
+            <button type="button" class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <!-- Добавим контейнер для мобильного меню после nav -->
+            <div class="mobile-menu">
+                <div class="mobile-menu-content">
+                    <a href="{% url 'home' %}" class="mobile-menu-item">Главная</a>
+                    <a href="{% url 'calculator' %}" class="mobile-menu-item">Калькуляторы</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}" class="mobile-menu-item">Профиль</a>
+                        <a href="{% url 'logout' %}" class="mobile-menu-item">Выйти</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="mobile-menu-item">Войти</a>
+                        <a href="{% url 'registration' %}" class="mobile-menu-item">Регистрация</a>
+                    {% endif %}
+                </div>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="{% url 'home' %}" class="nav-link">Главная</a></li>
+                    <li><a href="{% url 'calculator' %}" class="nav-link">Калькуляторы</a></li>
+                    <li class="dropdown">
+                        <button class="dropdown-toggle">
+                            {% if user.is_authenticated %}
+                                {{ user.username }}
+                            {% else %}
+                                Аккаунт
+                            {% endif %}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu">
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'profile' %}" class="dropdown-item">Профиль</a>
+                                <a href="{% url 'logout' %}" class="dropdown-item">Выйти</a>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="dropdown-item">Войти</a>
+                                <a href="{% url 'registration' %}" class="dropdown-item">Регистрация</a>
+                            {% endif %}
+                        </div>
+                    </li>
+                    <li>
+                        <button class="theme-toggle" aria-label="Toggle theme">
+                            <svg class="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 2V4M12 20V22M2 12H4M20 12H22M4.93 4.93L6.34 6.34M17.66 17.66L19.07 19.07M19.07 4.93L17.66 6.34M6.34 17.66L4.93 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <svg class="moon-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    {% endblock %}
+    </header>
+
+    <main>
+        <!-- Здесь будет основной контент -->
+        {% block content %}{% endblock %}
+    </main>
+
+    
+
+    <script>
+        // Скрипт для header при скролле
+        let lastScrollTop = 0;
+        const header = document.querySelector('.header');
+        const minScroll = 80;
+
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            }
+        }
+
+        const handleScroll = throttle(() => {
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (currentScroll > lastScrollTop && currentScroll > minScroll) {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+
+            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+        }, 100);
+
+        window.addEventListener('scroll', handleScroll);
+
+        
+    </script>
+    <script src="{% static 'js/base.js' %}"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

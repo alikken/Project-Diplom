@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Калькулятор материалов{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/calculator.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="calculator-container">
+    <div class="calculator-grid">
+        <!-- Левая колонка - данные комнаты -->
+        <div class="room-section">
+            <div class="section-header">
+                <h2>Параметры комнаты</h2>
+                <button type="button" id="saveTemplate" class="star-button" onclick="toggleTemplate()" title="Сохранить как шаблон">
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="none" stroke="var(--accent-blue)" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="roomForm" class="room-form">
+                <div class="form-group">
+                    <label for="roomName">Название комнаты</label>
+                    <input type="text" id="roomName" name="roomName" class="form-input" placeholder="Введите название комнаты" required>
+                </div>
+
+                <div class="dimensions-grid">
+                    <div class="form-group">
+                        <label for="roomLength">Длина (м)</label>
+                        <input type="number" 
+                               id="roomLength" 
+                               name="roomLength" 
+                               class="form-input" 
+                               step="0.1" 
+                               min="0.1" 
+                               onkeydown="preventInvalidInput(event)"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomWidth">Ширина (м)</label>
+                        <input type="number" 
+                               id="roomWidth" 
+                               name="roomWidth" 
+                               class="form-input" 
+                               step="0.1" 
+                               min="0.1" 
+                               onkeydown="preventInvalidInput(event)"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomHeight">Высота (м)</label>
+                        <input type="number" 
+                               id="roomHeight" 
+                               name="roomHeight" 
+                               class="form-input" 
+                               step="0.1" 
+                               min="0.1" 
+                               onkeydown="preventInvalidInput(event)"
+                               required>
+                    </div>
+                </div>
+                <!-- Секция проемов -->
+                <div class="openings-section">
+                    <div class="section-header">
+                        <h3>Проемы</h3>
+                        <button type="button" class="add-button" onclick="showOpeningsDialog()" title="Добавить проем">
+                            <span class="icon">+</span>
+                        </button>
+                    </div>
+                    <div id="openingsList" class="openings-list">
+                        <!-- Здесь будут проемы -->
+                    </div>
+                </div>
+            </form>
+        </div>
+
+
+        <!-- Правая колонка - материалы -->
+        <div class="materials-section">
+            <div class="section-header">
+                <h2>
+                    Материалы
+                    <button type="button" class="info-button" onclick="showFormulasModal()" title="Формулы расчета">
+                        <span class="material-icons">calculate</span>
+                    </button>
+                </h2>
+                <div class="material-add-wrapper" style="position: relative;">
+                    <button type="button" class="add-button" onclick="toggleMaterialDropdown()" title="Добавить материал">
+                        <span class="icon">+</span>
+                    </button>
+                </div>
+            </div>
+            <div id="materialsList" class="materials-grid">
+                <!-- Здесь будут карточки материалов -->
+            </div>
+        </div>
+        <!-- Добавим модальное окно с формулами -->
+        <div id="formulasModal" class="modal">
+            <div class="modal-content formulas-modal">
+                <div class="modal-header">
+                    <h3>Формулы расчета</h3>
+                    <button type="button" class="close-button" onclick="closeModal('formulasModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Перенесите содержимое formula-section сюда -->
+                    <div class="formula-section">
+                        <h4>Базовые расчеты площадей:</h4>
+                        <div class="formula">
+                            <p>Площадь пола/потолка:</p>
+                            \[S_{пол} = Длина \times Ширина\]
+                        </div>
+                        <div class="formula">
+                            <p>Площадь стен (без проемов):</p>
+                            \[S_{стен} = 2 \times (Длина + Ширина) \times Высота - S_{проемов}\]
+                        </div>
+                        <div class="formula">
+                            <p>Площадь проемов:</p>
+                            \[S_{проемов} = \sum_{i=1}^{n} (Ширина_i \times Высота_i)\]
+                        </div>
+                    </div>
+                    
+                    <div class="formula-section">
+                        <h4>Расчет материалов:</h4>
+                        <div class="formula">
+                            <p>Обои (рулоны):</p>
+                            \[N_{обои} = \left\lceil\frac{S_{стен}}{Ширина_{рулона} \times Длина_{рулона}} \times 1.1\right\rceil \text{ (запас 10 %)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Краска (литры):</p>
+                            \[V_{краска} = S_{стен} \times Расход \times Слои \times 1.05 \text{ (запас 5\%)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Ламинат (упаковки):</p>
+                            \[N_{ламинат} = \left\lceil\frac{S_{пол} \times 1.07}{Длина_{доски} \times Ширина_{доски} \times Штук\_в\_упаковке}\right\rceil \text{ (запас 7 %)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Плитка (штуки):</p>
+                            \[N_{плитка} = \left\lceil\frac{S_{стен} \times 1.1}{Длина_{плитки} \times Ширина_{плитки}}\right\rceil \text{ (запас 10 %)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Гипсокартон (листы):</p>
+                            \[N_{гкл} = \left\lceil\frac{S_{стен} \times 1.1}{Длина_{листа} \times Ширина_{листа}}\right\rceil \text{ (запас 10 %)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Кирпич (штуки):</p>
+                            \[N_{кирпич} = \left\lceil\frac{S_{стен}}{(Длина_{кирпича} + Шов) \times (Высота_{кирпича} + Шов)} \times 1.05\right\rceil \text{ (запас 5 %)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Стяжка пола (м³):</p>
+                            \[V_{стяжка} = S_{пол} \times Толщина \times 1.1 \text{ (запас 10 %)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Термопанели (панели):</p>
+                            \[N_{панели} = \left\lceil\frac{S_{стен} \times 1.07}{Длина_{панели} \times Ширина_{панели}}\right\rceil \text{ (запас 7 %)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Натяжной потолок (м²):</p>
+                            \[S_{потолок} = S_{пол} \times 1.05 \text{ (запас 5 %)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Потолок армстронг (плиты):</p>
+                            \[N_{армстронг} = \left\lceil\frac{S_{пол} \times 1.05}{(Размер_{плиты}/1000)^2}\right\rceil \text{ (запас 5 %)}\]
+                        </div>
+                        <div class="formula">
+                            <p>Грильято (м²):</p>
+                            \[S_{грильято} = S_{пол} \times 1.03 \text{ (запас 3 %)}\]
+                        </div>
+                    </div>
+                    
+                    <div class="formula-section">
+                        <h4>Примечания:</h4>
+                        <ul>
+                            <li>Коэффициенты запаса: 10%, 7%, 5%, 3% - учитывают необходимый запас материала на подрезку и отходы</li>
+                            <li>Символы \[\left\lceil x \right\rceil\] означают округление числа вверх до целого</li>
+                            <li>Размеры указываются в метрах, если не указано иное</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+    <!-- Кнопка расчета -->
+    <div class="calculation-section">
+        <button type="button" id="calculateButton" class="calculate-button" onclick="calculateMaterials()">
+            Рассчитать материалы
+        </button>
+    </div>
+
+    <!-- Результаты расчета -->
+    
+    <div id="resultsSection" class="results-section" style="display: none;">
+        <h2>Результаты расчета</h2>
+        <div id="calculationResults" class="results-grid">
+            <!-- Здесь будут результаты -->
+        </div>
+        <div id="totalSummary" class="total-summary">
+            <!-- Здесь будет общий итог -->
+        </div>
+        
+        <!-- Добавляем кнопки экспорта -->
+        <div class="export-buttons">
+            <button type="button" class="export-button" onclick="exportToPDF()">
+                <svg class="export-icon" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/>
+                    <polyline points="14 3 14 9 20 9"/>
+                    <line x1="12" y1="12" x2="12" y2="16"/>
+                    <line x1="10" y1="14" x2="14" y2="14"/>
+                </svg>
+                Сохранить в PDF
+            </button>
+            <button type="button" class="export-button" onclick="exportToExcel()">
+                <svg class="export-icon" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <path d="M8 13h8M8 17h8M8 9h1"/>
+                </svg>
+                Сохранить в Excel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для добавления проема -->
+<div id="openingsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Добавление проема</h3>
+            <button type="button" class="close-button" onclick="closeModal('openingsModal')">&times;</button>
+        </div>
+        <form onsubmit="event.preventDefault(); addOpening();">
+            <div class="form-group">
+                <label for="openingType">Тип проема</label>
+                <select id="openingType" class="form-input" required>
+                    <option value="window">Окно</option>
+                    <option value="door">Дверь</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="openingWidth">Ширина (м)</label>
+                <input type="number" id="openingWidth" class="form-input" step="0.1" min="0.1" required>
+            </div>
+            <div class="form-group">
+                <label for="openingHeight">Высота (м)</label>
+                <input type="number" id="openingHeight" class="form-input" step="0.1" min="0.1" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('openingsModal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/calculator.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Вход в систему</h2>
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error-message">
+                            {{ field.errors|join:", " }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="auth-button">Войти</button>
+        </form>
+        <div class="auth-footer">
+            Нет аккаунта? <a href="{% url 'registration' %}" class="auth-link">Зарегистрироваться</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
